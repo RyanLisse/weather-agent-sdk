@@ -1,0 +1,173 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">Fixtures and the Outside World</h1>
+      <p class="module-subtitle">When the agent uses fake weather, when it goes to the real internet, and how secrets stay out of git.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Plastic fruit in the shop window</h2>
+        <p>Shops put plastic fruit in the window: it looks right, never rots, and is identical every morning. The <span class="term" data-definition="A fixture is fixed, fake sample data. Tests and demos use it so results are predictable and need no network or payment.">fixture</span> is this repo's plastic fruit: Amsterdam, 14°C, 72% rain, forever.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">src/tools/get_weather.ts</span>
+            <pre><code><span class="code-line"><span class="code-comment">/** Deterministic Amsterdam fixture — unit tests pass without network or API key. */</span></span>
+<span class="code-line"><span class="code-keyword">export</span> <span class="code-keyword">const</span> FIXTURE_WEATHER: WeatherObservation = {</span>
+<span class="code-line">  <span class="code-property">city</span>: <span class="code-string">'Amsterdam'</span>,</span>
+<span class="code-line">  <span class="code-property">date</span>: <span class="code-string">'2026-09-21'</span>,</span>
+<span class="code-line">  <span class="code-property">temperatureC</span>: <span class="code-number">14</span>,</span>
+<span class="code-line">  <span class="code-property">precipitationProbability</span>: <span class="code-number">72</span>,</span>
+<span class="code-line">};</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">A note: this data is <span class="term" data-definition="Deterministic means 'same input, same output, every time'. No randomness, no surprises. Tests love it.">deterministic</span>, so tests never need the internet or a key.</p>
+              <p class="tl">A shared constant shaped like a <span class="term" data-definition="A type is a promise about the shape of data, e.g. 'always has city, date, temperatureC and precipitationProbability'. TypeScript checks the promise before the code runs.">WeatherObservation</span>:</p>
+              <p class="tl">City: Amsterdam.</p>
+              <p class="tl">Date: 21 September 2026.</p>
+              <p class="tl">14 degrees Celsius.</p>
+              <p class="tl">72% chance of rain (high enough for an umbrella).</p>
+              <p class="tl">Done.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three doors inside fetchWeather</h2>
+        <p>Every lookup walks through <code>fetchWeather</code> and exits through one of three doors. Which one depends on two <span class="term" data-definition="Environment variables are named settings outside your code (in your shell or a .env file). You change behaviour without editing code: WEATHER_BASE_URL=https://... pnpm start.">environment variables</span>.</p>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Fixture door (default)</strong>
+              <p>No <code>WEATHER_BASE_URL</code> set, or <code>WEATHER_USE_FIXTURE=1</code>. Returns the plastic fruit with your city and date pasted on.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Safety-net door</strong>
+              <p>Fixture was switched off (<code>WEATHER_USE_FIXTURE=0</code>) but there's still no URL. Rather than crash, it hands back the fixture anyway.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Real-world door</strong>
+              <p>A <code>WEATHER_BASE_URL</code> exists and the fixture isn't forced: it makes a real <span class="term" data-definition="HTTP is the language browsers and servers use to talk. A GET request asks a server for data at a URL, and the server replies with a status code (200 = OK, 404 = not found, 500 = server broke).">HTTP</span> request.</p>
+            </div>
+          </div>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">src/tools/get_weather.ts</span>
+            <pre><code><span class="code-line">  <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-function">weatherUrl</span>(input.baseUrl, input));</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!response.ok) <span class="code-keyword">throw new</span> <span class="code-function">Error</span>(<span class="code-string">`Weather request failed with ${response.status}`</span>);</span>
+<span class="code-line">  <span class="code-keyword">return</span> (<span class="code-keyword">await</span> response.<span class="code-function">json</span>()) <span class="code-keyword">as</span> WeatherObservation;</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Build the full address and ask the weather server, then wait for the reply.</p>
+              <p class="tl">If the server said anything other than "OK", stop loudly and include the status code (like 404 or 500) in the error.</p>
+              <p class="tl">Otherwise read the reply as JSON and trust that it has the WeatherObservation shape.</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">🔍</div>
+          <div class="callout-content">
+            <strong class="callout-title">Notice the "trust"</strong>
+            <p><code>as WeatherObservation</code> is a promise to the compiler, not a check. If a real server returns different field names, nothing complains until something downstream reads <code>undefined</code>. A <span class="term" data-definition="Runtime validation checks data while the program is actually running (e.g. with a Zod schema), rather than only trusting type labels written in code.">runtime validation</span> step would catch it.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Keeping the key out of git</h2>
+        <p>The live lane needs <code>ANTHROPIC_API_KEY</code>. The repo treats it like a house key: kept on you, never taped to the front door.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">src/agent.ts</span>
+            <pre><code><span class="code-line"><span class="code-keyword">export</span> <span class="code-keyword">async</span> <span class="code-keyword">function</span> <span class="code-function">runWeatherAgent</span>(prompt: string) {</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!process.env.ANTHROPIC_API_KEY) {</span>
+<span class="code-line">    <span class="code-keyword">throw new</span> <span class="code-function">Error</span>(<span class="code-string">'Set ANTHROPIC_API_KEY in the environment (see .env.example). No secrets in git.'</span>);</span>
+<span class="code-line">  }</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">The live-lane function, which takes your question as text.</p>
+              <p class="tl">First, check: is there an API key in the environment?</p>
+              <p class="tl">If not, stop immediately with a helpful message pointing at .env.example.</p>
+              <p class="tl">(Only past this gate does any money get spent.)</p>
+            </div>
+          </div>
+        </div>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">.env.example</code>
+            <span class="badge-desc">Committed template with an empty <code>ANTHROPIC_API_KEY=</code> line</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">.env</code>
+            <span class="badge-desc">Your real copy with the key. Listed in <span class="term" data-definition="A .gitignore file lists files git should never track or upload. Secrets and build output go here.">.gitignore</span>, so git never uploads it</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Check your understanding</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="b"
+               data-explanation-right="Exactly. With a WEATHER_BASE_URL set and the fixture not forced, it takes the real-world door. Your server returned 503, so the tool threw an error with that status."
+               data-explanation-wrong="Not quite. The message 'Weather request failed with 503' only comes from the real-world door, which only opens when WEATHER_BASE_URL is set. The server itself is unhappy.">
+            <h3 class="quiz-question">After setting <code>WEATHER_BASE_URL</code>, the tool throws "Weather request failed with 503". Where do you look first?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The fixture numbers in FIXTURE_WEATHER</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The weather server at that URL: it is up but refusing requests</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The ANTHROPIC_API_KEY</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="a"
+               data-explanation-right="Right. WEATHER_USE_FIXTURE=1 forces the fixture door even when a URL is set, so the workshop never depends on the network."
+               data-explanation-wrong="Not quite. You don't need to delete anything. The fixture door opens when WEATHER_USE_FIXTURE is 1, even with a URL configured.">
+            <h3 class="quiz-question">You're teaching a workshop on bad Wi-Fi, but your shell has <code>WEATHER_BASE_URL</code> set. How do you guarantee plastic-fruit data?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Set WEATHER_USE_FIXTURE=1</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Set WEATHER_USE_FIXTURE=0</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Delete get_weather.ts</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="c"
+               data-explanation-right="Yes. Secrets belong in environment variables or a gitignored .env. Pasting a key into source code puts it in git history, where it's effectively public."
+               data-explanation-wrong="Not quite. Any key written into a source file ends up in git history. Keep it in .env (ignored by git) or your shell environment.">
+            <h3 class="quiz-question">Your AI assistant suggests "just hardcode the API key in agent.ts to save time". What do you say?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Fine, the repo is small</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Fine, as long as it's in a comment</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>No: put it in .env or the shell environment, which git ignores</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

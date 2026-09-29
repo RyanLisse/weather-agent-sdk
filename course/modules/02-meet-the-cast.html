@@ -1,0 +1,209 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Meet the Cast</h1>
+      <p class="module-subtitle">Six files, six jobs. Knowing who does what lets you tell your AI exactly where a change belongs.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A TV weather studio</h2>
+        <p>Picture the evening weather broadcast. A <strong>presenter</strong> reads from a <strong>script</strong>, a <strong>producer</strong> runs the show, a <strong>weather station</strong> supplies numbers, and a <strong>style guide</strong> says when to show the umbrella icon. This repo has exactly that crew.</p>
+
+        <div class="file-tree">
+          <div class="ft-file">
+            <span class="ft-name">instructions.md</span>
+            <span class="ft-desc">The script: always-on rules Claude must follow (the "system prompt")</span>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">src/</span>
+            <span class="ft-desc">All the program code</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">agent.ts</span>
+                <span class="ft-desc">The producer: starts the run, wires Claude to the tool</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">decide.ts</span>
+                <span class="ft-desc">The style guide: umbrella rule and clothing rule</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">quest-clothing.ts</span>
+                <span class="ft-desc">The rehearsal: checks the clothing quest is done</span>
+              </div>
+              <div class="ft-folder open">
+                <span class="ft-name">tools/</span>
+                <span class="ft-desc">Things Claude may ask to run</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">get_weather.ts</span>
+                    <span class="ft-desc">The weather station: fixture data or a real HTTP lookup</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">tests/</span>
+            <span class="ft-desc">Automatic checks that run with no API key</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Backstage chatter</h2>
+        <p>Here is how the crew talks during one live run. Press play.</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">A</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">agent.ts</span>
+                <p>We're live. I've loaded the script from instructions.md and registered one tool. Claude, over to you.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Claude</span>
+                <p>Script says I must call get_weather before answering. get_weather, Amsterdam, 2026-09-21 please.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="weather" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">W</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">get_weather</span>
+                <p>No WEATHER_BASE_URL set, so fixture it is: {"temperatureC":14,"precipitationProbability":72}.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Claude</span>
+                <p>72 is at least 60, so "bring umbrella". Script also wants clothing advice in Dutch: lichte jas, paraplu mee.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="decide" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">decide.ts</span>
+                <p>For the record, my code gives the same result in the fixture lane: "lichte jas of trui; paraplu mee". We agree.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="tests" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">T</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">tests</span>
+                <p>And I check that every time someone runs pnpm test. No key, no network, still green.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">How the producer hands Claude its tools</h2>
+        <p>Tools don't reach Claude one by one. agent.ts packs them into a small <span class="term" data-definition="MCP (Model Context Protocol) is a standard way to offer tools to an AI model. An 'MCP server' is a bundle of tools the model can see and call. Tell your AI 'expose this function as an MCP tool'.">MCP</span> server, like a toolbox with a label on the lid.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">src/agent.ts</span>
+            <pre><code><span class="code-line"><span class="code-keyword">export</span> <span class="code-keyword">function</span> <span class="code-function">weatherMcpServer</span>() {</span>
+<span class="code-line">  <span class="code-keyword">return</span> <span class="code-function">createSdkMcpServer</span>({</span>
+<span class="code-line">    <span class="code-property">name</span>: <span class="code-string">'weather-agent-sdk'</span>,</span>
+<span class="code-line">    <span class="code-property">version</span>: <span class="code-string">'0.1.0'</span>,</span>
+<span class="code-line">    <span class="code-property">tools</span>: [getWeatherTool],</span>
+<span class="code-line">  });</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Define a reusable <span class="term" data-definition="A function is a named, reusable block of code. You 'call' it to run it. 'export' means other files are allowed to use it.">function</span> other files can use, called weatherMcpServer.</p>
+              <p class="tl">It builds a toolbox using a helper from the SDK...</p>
+              <p class="tl">...labels the toolbox with a name...</p>
+              <p class="tl">...and a version number...</p>
+              <p class="tl">...and puts exactly one tool inside: get_weather.</p>
+              <p class="tl">Close the toolbox.</p>
+              <p class="tl">Done.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🧭</div>
+          <div class="callout-content">
+            <strong class="callout-title">Why this matters when steering AI</strong>
+            <p>Adding a second tool means two edits: write it in <code>src/tools/</code>, then add it to this <code>tools: [...]</code> list (and to the allowed list you'll meet in Module 3). Forget either and Claude will never use it.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Check your understanding</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="a"
+               data-explanation-right="Exactly. Tone and language are behaviour rules for Claude, and those live in the script: instructions.md. No code change needed."
+               data-explanation-wrong="Not quite. The language Claude answers in is a behaviour rule, and behaviour rules live in instructions.md (the script), not in the code files.">
+            <h3 class="quiz-question">You want the agent to answer in English by default. Which crew member do you change?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The script: instructions.md</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The weather station: get_weather.ts</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The style guide: decide.ts</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="c"
+               data-explanation-right="Right. The threshold lives in decideWeather in decide.ts. Changing it there updates the fixture lane and the tests see it. (You'd also update the matching sentence in instructions.md so Claude agrees.)"
+               data-explanation-wrong="Not quite. The number 60 is part of the umbrella rule, which is the style guide: decideWeather in decide.ts. The tool only reports raw numbers.">
+            <h3 class="quiz-question">Your manager says "umbrella from 50% rain, not 60%". Where does the code change go first?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>get_weather.ts, so the tool reports higher rain chances</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>agent.ts, in weatherMcpServer</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>decide.ts, in the umbrella rule</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="b"
+               data-explanation-right="Yes. A tool that exists as a file but is not in the toolbox list is invisible to Claude."
+               data-explanation-wrong="Not quite. Writing the tool file is only half the job. If it isn't listed in createSdkMcpServer's tools array, Claude never sees it.">
+            <h3 class="quiz-question">Your AI assistant wrote <code>src/tools/get_uv_index.ts</code>, but Claude never calls it. What is the most likely missing step?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The file needs to be in the tests folder</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>It was never added to the tools list in weatherMcpServer</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>UV data needs a different programming language</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,180 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">The Tool Call Handshake</h1>
+      <p class="module-subtitle">How a tool describes itself to Claude, and how agent.ts runs the conversation loop.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A form at the town hall</h2>
+        <p>At the town hall you can't just shout "I want a parking permit". You fill in a form with labelled boxes, and the clerk rejects it if a box is empty. A tool definition is that form: a name, a one-line purpose, and boxes Claude must fill in.</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">get_weather</code>
+            <span class="badge-desc">The form's name. Claude uses it to say which tool it wants.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">description</code>
+            <span class="badge-desc">One sentence Claude reads to decide <em>when</em> this tool is useful.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">city, date</code>
+            <span class="badge-desc">The boxes. Each has a type (text) and a hint for Claude.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">handler</code>
+            <span class="badge-desc">The clerk who processes the form and hands back an answer.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The form, in real code</h2>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">src/tools/get_weather.ts</span>
+            <pre><code><span class="code-line"><span class="code-keyword">export</span> <span class="code-keyword">const</span> getWeatherTool = <span class="code-function">tool</span>(</span>
+<span class="code-line">  <span class="code-string">'get_weather'</span>,</span>
+<span class="code-line">  <span class="code-string">'Fetch weather for a city and date (fixture by default for labs).'</span>,</span>
+<span class="code-line">  {</span>
+<span class="code-line">    <span class="code-property">city</span>: z.<span class="code-function">string</span>().<span class="code-function">describe</span>(<span class="code-string">'City name'</span>),</span>
+<span class="code-line">    <span class="code-property">date</span>: z.<span class="code-function">string</span>().<span class="code-function">describe</span>(<span class="code-string">'ISO date YYYY-MM-DD'</span>),</span>
+<span class="code-line">  },</span>
+<span class="code-line">  <span class="code-keyword">async</span> (args) <span class="code-operator">=&gt;</span> {</span>
+<span class="code-line">    <span class="code-keyword">const</span> weather = <span class="code-keyword">await</span> <span class="code-function">fetchWeather</span>({</span>
+<span class="code-line">      <span class="code-property">city</span>: args.city,</span>
+<span class="code-line">      <span class="code-property">date</span>: args.date,</span>
+<span class="code-line">      <span class="code-property">baseUrl</span>: process.env.WEATHER_BASE_URL,</span>
+<span class="code-line">      <span class="code-property">useFixture</span>: process.env.WEATHER_USE_FIXTURE !== <span class="code-string">'0'</span>,</span>
+<span class="code-line">    });</span>
+<span class="code-line">    <span class="code-keyword">return</span> {</span>
+<span class="code-line">      <span class="code-property">content</span>: [{ <span class="code-property">type</span>: <span class="code-string">'text'</span> <span class="code-keyword">as const</span>, <span class="code-property">text</span>: JSON.<span class="code-function">stringify</span>(weather) }],</span>
+<span class="code-line">    };</span>
+<span class="code-line">  },</span>
+<span class="code-line">);</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Create a tool using the SDK's <code>tool()</code> helper, and share it with other files.</p>
+              <p class="tl">Its name is get_weather.</p>
+              <p class="tl">Its description, which Claude reads to decide when to use it.</p>
+              <p class="tl">Now the boxes on the form, checked by <span class="term" data-definition="Zod is a library that describes the exact shape data must have (e.g. 'city must be text') and rejects anything that doesn't match. Say 'validate this with a zod schema' to your AI.">Zod</span>:</p>
+              <p class="tl">city must be text, hinted as "City name".</p>
+              <p class="tl">date must be text, hinted as an <span class="term" data-definition="ISO 8601 is the international standard date format: year-month-day, like 2026-09-21. It sorts correctly and nobody confuses day and month.">ISO date</span>.</p>
+              <p class="tl">End of boxes.</p>
+              <p class="tl">The clerk: an <span class="term" data-definition="Async (asynchronous) code can wait for slow things, like a network request, without freezing the whole program. 'await' means 'pause here until the answer arrives'.">async</span> function that receives Claude's filled-in form (args).</p>
+              <p class="tl">Wait for the real weather lookup (Module 4 opens this box)...</p>
+              <p class="tl">...passing the city Claude asked for...</p>
+              <p class="tl">...and the date...</p>
+              <p class="tl">...plus an optional real weather service address from the environment...</p>
+              <p class="tl">...and use fake data unless someone set WEATHER_USE_FIXTURE to "0".</p>
+              <p class="tl">Lookup done.</p>
+              <p class="tl">Hand the answer back...</p>
+              <p class="tl">...as a single text message containing the weather as JSON. Claude reads text, so we turn the data into text.</p>
+              <p class="tl">End of answer.</p>
+              <p class="tl">End of the clerk.</p>
+              <p class="tl">End of the tool.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Starting the conversation loop</h2>
+        <p>The live lane calls the SDK's <code>query()</code>. It is a <span class="term" data-definition="A stream (here an 'async iterator') hands you results one at a time as they happen, instead of all at once at the end. 'for await' loops over them as they arrive.">stream</span>: every message in the round trip (tool request, tool result, final answer) arrives one by one, and agent.ts collects them all.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">src/agent.ts</span>
+            <pre><code><span class="code-line">  <span class="code-keyword">for await</span> (<span class="code-keyword">const</span> message <span class="code-keyword">of</span> <span class="code-function">query</span>({</span>
+<span class="code-line">    prompt,</span>
+<span class="code-line">    <span class="code-property">options</span>: {</span>
+<span class="code-line">      <span class="code-property">systemPrompt</span>: instructions,</span>
+<span class="code-line">      <span class="code-property">mcpServers</span>: { <span class="code-property">weather</span>: server },</span>
+<span class="code-line">      <span class="code-property">allowedTools</span>: [<span class="code-string">'mcp__weather__get_weather'</span>],</span>
+<span class="code-line">      <span class="code-property">permissionMode</span>: <span class="code-string">'bypassPermissions'</span>,</span>
+<span class="code-line">    },</span>
+<span class="code-line">  })) {</span>
+<span class="code-line">    messages.<span class="code-function">push</span>(message);</span>
+<span class="code-line">  }</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Start a conversation with Claude and handle each message as it arrives...</p>
+              <p class="tl">...sending your question...</p>
+              <p class="tl">...with these settings:</p>
+              <p class="tl">The <span class="term" data-definition="The system prompt is the hidden, always-on instruction text the model reads before your question. Here it is the whole of instructions.md.">system prompt</span> is the text of instructions.md.</p>
+              <p class="tl">Plug in our toolbox and call it "weather".</p>
+              <p class="tl">Only this one tool may be used. Its full name is mcp + toolbox name + tool name.</p>
+              <p class="tl">Don't stop to ask a human "may I run this tool?" each time.</p>
+              <p class="tl">End of settings.</p>
+              <p class="tl">For every message that streams back...</p>
+              <p class="tl">...add it to our list, so we can print the last few later.</p>
+              <p class="tl">Loop finished: the conversation is over.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">The name has to match three places</strong>
+            <p><code>mcp__weather__get_weather</code> is built from the key <code>weather</code> in <code>mcpServers</code> and the tool name <code>'get_weather'</code>. Rename either one and the allow-list silently stops matching, so Claude can't call the tool.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Check your understanding</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="b"
+               data-explanation-right="Exactly. The allow-list still says mcp__weather__get_weather, but the server is now registered as forecast, so the real name is mcp__forecast__get_weather. Nothing matches."
+               data-explanation-wrong="Not quite. The allowed tool name is assembled from the mcpServers key plus the tool name. Renaming the key breaks that match.">
+            <h3 class="quiz-question">An AI refactor renamed <code>mcpServers: { weather: server }</code> to <code>{ forecast: server }</code>. Now Claude answers without ever checking the weather. Why?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Claude doesn't like the word forecast</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>allowedTools still lists mcp__weather__get_weather, which no longer exists</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The fixture data was deleted</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="a"
+               data-explanation-right="Right. The description is what Claude reads to decide when a tool fits. Vague descriptions lead to tools being skipped or misused."
+               data-explanation-wrong="Not quite. Claude never sees your function body. It chooses tools based on their name, description, and input hints.">
+            <h3 class="quiz-question">You add a tool described only as "does stuff". Claude rarely picks it. What is the best fix?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Write a clear description of what it returns and when to use it</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Make the function body longer so Claude sees more code</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Remove all the Zod boxes so it's easier to call</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="c"
+               data-explanation-right="Yes. bypassPermissions is fine for one read-only weather lookup. For tools that delete, pay, or send, you want a human approval step or a tight allow-list."
+               data-explanation-wrong="Not quite. bypassPermissions skips the 'may I?' prompt. That's harmless for a weather lookup but risky for tools with real side effects.">
+            <h3 class="quiz-question">You plan to add a <code>send_email</code> tool next to get_weather. What deserves a second look?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The ISO date hint on get_weather</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The version number of the MCP server</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>permissionMode: bypassPermissions, since emails can't be unsent</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

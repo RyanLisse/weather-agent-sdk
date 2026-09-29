@@ -76,6 +76,16 @@ Uses a deterministic weather fixture so CI/labs pass without network or model sp
 | `src/decide.ts` | Shared decision contract from Academy day-01/02 |
 | `src/agent.ts` | Fixture runner + optional `query()` SDK path |
 
+## Interactive course
+
+`course/` holds a self-contained HTML walkthrough of this kit for non-engineers: the tool-call round trip, the tool definition, fixtures vs live, and the clothing quest. Each module has animations, code-to-English translations and a short quiz.
+
+```bash
+open course/index.html
+```
+
+No server or build step needed to read it. To rebuild after editing `course/modules/*.html`, run `bash build.sh` inside `course/`.
+
 ## License
 
 MIT

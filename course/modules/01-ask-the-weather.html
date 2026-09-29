@@ -1,0 +1,196 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">Ask About the Weather</h1>
+      <p class="module-subtitle">What this little agent does, and the journey a single question takes before it comes back as an answer.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What is this thing?</h2>
+        <p>You type <em>"Wat is het weer in Amsterdam op 2026-09-21? Geef kledingadvies."</em> and get back a friendly Dutch answer: rain is likely, bring an umbrella, wear a light jacket. That is the whole product.</p>
+        <p>Under the hood it is a starter kit for building an <span class="term" data-definition="A program where an AI model can decide to take actions (like calling a tool) instead of only writing text. When you ask AI to 'build an agent', this is what you mean: a model plus tools plus a loop.">agent</span> with the <span class="term" data-definition="Claude Agent SDK: a toolkit (SDK = Software Development Kit, a bundle of ready-made code) from Anthropic that lets your program run Claude as an agent with tools. You install it like any other library.">Claude Agent SDK</span>. It is deliberately tiny so you can see every moving part.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌦️</div>
+            <h4 class="pattern-title">One tool</h4>
+            <p class="pattern-desc"><code>get_weather</code> looks up temperature and chance of rain for a city and date.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">☂️</div>
+            <h4 class="pattern-title">One decision rule</h4>
+            <p class="pattern-desc">Rain chance of 60% or more means "bring umbrella". Everything else: leave it.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🧥</div>
+            <h4 class="pattern-title">One mini-quest</h4>
+            <p class="pattern-desc">Add clothing advice (jas / geen jas / paraplu) by editing instructions only, no new code.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Two ways to run it</h2>
+        <p>The kit has a free practice lane and a real lane. Think of a pilot: the <strong>flight simulator</strong> needs no fuel, the <strong>real plane</strong> needs a ticket (your API key).</p>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Simulator lane (always runs)</strong>
+              <p>Uses a built-in <span class="term" data-definition="A fixture is fake, fixed sample data used for practice and testing. It always returns the same answer, so results are predictable and nothing costs money.">fixture</span>: Amsterdam, 14°C, 72% rain. No internet, no AI, no cost.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Live lane (only with a key)</strong>
+              <p>If <code>ANTHROPIC_API_KEY</code> is set as an <span class="term" data-definition="An environment variable is a named setting that lives outside your code, in the terminal session or a .env file. Secrets like API keys go here so they never end up in git.">environment variable</span>, Claude itself gets the question and calls the tool.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The fork in the road, in code</h2>
+        <p>This is the bottom of <code>src/agent.ts</code>, the <span class="term" data-definition="The entry point is the file that runs first when you start a program. Here, 'pnpm start' runs src/agent.ts.">entry point</span>. Every run starts here.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">src/agent.ts</span>
+            <pre><code><span class="code-line"><span class="code-keyword">if</span> (isMain) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> city = process.argv[<span class="code-number">2</span>] || <span class="code-string">'Amsterdam'</span>;</span>
+<span class="code-line">  <span class="code-keyword">const</span> date = process.argv[<span class="code-number">3</span>] || <span class="code-string">'2026-09-21'</span>;</span>
+<span class="code-line">  <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> <span class="code-function">fetchWeatherDecision</span>({ city, date, <span class="code-property">useFixture</span>: <span class="code-keyword">true</span> });</span>
+<span class="code-line">  console.<span class="code-function">log</span>(JSON.<span class="code-function">stringify</span>(result, <span class="code-keyword">null</span>, <span class="code-number">2</span>));</span>
+<span class="code-line">  <span class="code-keyword">if</span> (process.env.ANTHROPIC_API_KEY) {</span>
+<span class="code-line">    console.<span class="code-function">log</span>(<span class="code-string">'\n— live SDK run —'</span>);</span>
+<span class="code-line">    <span class="code-keyword">const</span> live = <span class="code-keyword">await</span> <span class="code-function">runWeatherAgent</span>(<span class="code-string">`Wat is het weer in ${city} op ${date}? Geef kledingadvies.`</span>);</span>
+<span class="code-line">    console.<span class="code-function">log</span>(JSON.<span class="code-function">stringify</span>(live.<span class="code-function">slice</span>(-<span class="code-number">3</span>), <span class="code-keyword">null</span>, <span class="code-number">2</span>));</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Only do this when the file is run directly (not when another file borrows its functions).</p>
+              <p class="tl">City: take the first word you typed after the command, or default to Amsterdam.</p>
+              <p class="tl">Date: take the second word, or default to 21 September 2026.</p>
+              <p class="tl">Run the simulator lane: fetch fixture weather and decide umbrella + clothing.</p>
+              <p class="tl">Print the result as neatly indented <span class="term" data-definition="JSON (JavaScript Object Notation) is a plain-text format for structured data, using curly braces and key: value pairs. Almost every API speaks it.">JSON</span>.</p>
+              <p class="tl">Is there an API key in the environment? Only then...</p>
+              <p class="tl">...print a divider...</p>
+              <p class="tl">...ask real Claude the question in Dutch, including clothing advice...</p>
+              <p class="tl">...and print just the last three messages of the conversation.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Follow one question around the loop</h2>
+        <p>In the live lane, the answer does not come straight back. Claude pauses, asks for data, waits, then finishes. Click through the <span class="term" data-definition="A tool call is when the AI model says 'please run this function with these inputs' instead of answering directly. Your program runs it and hands the result back.">tool call</span> round trip.</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"You ask: what is the weather in Amsterdam on 2026-09-21? Give clothing advice."},
+          {"highlight":"flow-actor-2","label":"agent.ts wraps your question with instructions.md and the list of allowed tools","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-4","label":"The SDK sends it all to Claude. Claude reads: always call get_weather before answering.","packet":true,"from":"actor-2","to":"actor-4"},
+          {"highlight":"flow-actor-2","label":"Claude replies with a tool call, not an answer: get_weather with city Amsterdam and date 2026-09-21","packet":true,"from":"actor-4","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"The SDK runs get_weather on your machine","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-2","label":"get_weather returns JSON text: 14 degrees C, 72 percent chance of rain","packet":true,"from":"actor-3","to":"actor-2"},
+          {"highlight":"flow-actor-4","label":"The SDK passes the tool result back to Claude","packet":true,"from":"actor-2","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"Claude applies the rule: 72 is at least 60, so bring umbrella. 14 degrees means a light jacket."},
+          {"highlight":"flow-actor-5","label":"Final answer in Dutch: lichte jas, paraplu mee!","packet":true,"from":"actor-4","to":"actor-5"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🙋</div>
+              <span>You</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🤖</div>
+              <span>agent.ts + SDK</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🌦️</div>
+              <span>get_weather</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🧠</div>
+              <span>Claude (model)</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">💬</div>
+              <span>Answer</span>
+            </div>
+          </div>
+
+          <div class="flow-packet"></div>
+
+          <div class="flow-step-label">Click "Next Step" to begin</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">The model never touches the weather itself</strong>
+            <p>Claude only <em>asks</em> for the tool to run. Your code does the actual work and reports back. That split is why agents can be safe: you decide which tools exist and what they are allowed to do.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Check your understanding</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="b"
+               data-explanation-right="Exactly. Without ANTHROPIC_API_KEY the program only runs the simulator lane and prints a tip. The fixture output is still correct and useful."
+               data-explanation-wrong="Not quite. Look at the fork: the live lane only runs when the API key exists. Without it, you get fixture JSON plus a tip. Nothing is broken.">
+            <h3 class="quiz-question">A teammate runs <code>pnpm start</code> and sees only the Amsterdam JSON plus a "(Tip)" line. No Claude answer. What happened?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The weather tool crashed</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>No API key is set, so only the simulator lane ran</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Claude refused to answer in Dutch</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="c"
+               data-explanation-right="Right. The model decides WHAT to call; your program does the calling. The weather data is fetched by get_weather running locally."
+               data-explanation-wrong="Not quite. In the round trip, Claude sends back a request to run get_weather. The SDK runs it on your machine and returns the result.">
+            <h3 class="quiz-question">In the live lane, who actually fetches the weather data?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Claude looks it up on the internet by itself</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>You paste it into the prompt</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The get_weather function in your code, after Claude asks for it</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="a"
+               data-explanation-right="Yes. The city and date come from the command line (process.argv), so you just pass them as extra words."
+               data-explanation-wrong="Not quite. agent.ts already reads city and date from the words after the command. No code changes needed.">
+            <h3 class="quiz-question">You want advice for Utrecht on 2026-10-01 without editing any code. What do you tell your AI assistant to run?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Run agent.ts with the arguments "Utrecht 2026-10-01"</span></button>
+              <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Change the default city inside agent.ts</span></button>
+              <button class="quiz-option" data-value="c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Add a new tool called get_utrecht_weather</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
