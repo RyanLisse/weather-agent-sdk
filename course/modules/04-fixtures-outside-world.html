@@ -39,7 +39,7 @@
 
       <section class="screen animate-in">
         <h2 class="screen-heading">Three doors inside fetchWeather</h2>
-        <p>Every lookup walks through <code>fetchWeather</code> and exits through one of three doors. Which one depends on two <span class="term" data-definition="Environment variables are named settings outside your code (in your shell or a .env file). You change behaviour without editing code: WEATHER_BASE_URL=https://... pnpm start.">environment variables</span>.</p>
+        <p>Every lookup walks through <code>fetchWeather</code> and exits through one of three doors. Which one depends on two <span class="term" data-definition="Environment variables are named settings outside your code. Set them in your terminal, then run npm start.">environment variables</span>.</p>
         <div class="step-cards">
           <div class="step-card">
             <div class="step-num">1</div>
@@ -96,7 +96,7 @@
             <span class="translation-label">src/agent.ts</span>
             <pre><code><span class="code-line"><span class="code-keyword">export</span> <span class="code-keyword">async</span> <span class="code-keyword">function</span> <span class="code-function">runWeatherAgent</span>(prompt: string) {</span>
 <span class="code-line">  <span class="code-keyword">if</span> (!process.env.ANTHROPIC_API_KEY) {</span>
-<span class="code-line">    <span class="code-keyword">throw new</span> <span class="code-function">Error</span>(<span class="code-string">'Set ANTHROPIC_API_KEY in the environment (see .env.example). No secrets in git.'</span>);</span>
+<span class="code-line">    <span class="code-keyword">throw new</span> <span class="code-function">Error</span>(<span class="code-string">'Set ANTHROPIC_API_KEY in the environment. No secrets in git.'</span>);</span>
 <span class="code-line">  }</span></code></pre>
           </div>
           <div class="translation-english">
@@ -104,19 +104,19 @@
             <div class="translation-lines">
               <p class="tl">The live-lane function, which takes your question as text.</p>
               <p class="tl">First, check: is there an API key in the environment?</p>
-              <p class="tl">If not, stop immediately with a helpful message pointing at .env.example.</p>
+              <p class="tl">If not, stop and ask for a key in the terminal before running the live path.</p>
               <p class="tl">(Only past this gate does any money get spent.)</p>
             </div>
           </div>
         </div>
         <div class="badge-list">
           <div class="badge-item">
-            <code class="badge-code">.env.example</code>
-            <span class="badge-desc">Committed template with an empty <code>ANTHROPIC_API_KEY=</code> line</span>
+            <code class="badge-code">ANTHROPIC_API_KEY</code>
+            <span class="badge-desc">Set it in the terminal for a live run. Do not save it to a file.</span>
           </div>
           <div class="badge-item">
-            <code class="badge-code">.env</code>
-            <span class="badge-desc">Your real copy with the key. Listed in <span class="term" data-definition="A .gitignore file lists files git should never track or upload. Secrets and build output go here.">.gitignore</span>, so git never uploads it</span>
+            <code class="badge-code">.gitignore</code>
+            <span class="badge-desc">A list of files git should not track. The API key stays in your terminal, not in a file.</span>
           </div>
         </div>
       </section>

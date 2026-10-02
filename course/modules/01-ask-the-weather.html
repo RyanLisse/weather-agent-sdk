@@ -47,7 +47,7 @@
             <div class="step-num">2</div>
             <div class="step-body">
               <strong>Live lane (only with a key)</strong>
-              <p>If <code>ANTHROPIC_API_KEY</code> is set as an <span class="term" data-definition="An environment variable is a named setting that lives outside your code, in the terminal session or a .env file. Secrets like API keys go here so they never end up in git.">environment variable</span>, Claude itself gets the question and calls the tool.</p>
+              <p>If <code>ANTHROPIC_API_KEY</code> is set in your terminal session, Claude gets the question and calls the tool.</p>
             </div>
           </div>
         </div>
@@ -55,7 +55,7 @@
 
       <section class="screen animate-in">
         <h2 class="screen-heading">The fork in the road, in code</h2>
-        <p>This is the bottom of <code>src/agent.ts</code>, the <span class="term" data-definition="The entry point is the file that runs first when you start a program. Here, 'pnpm start' runs src/agent.ts.">entry point</span>. Every run starts here.</p>
+        <p>This is the bottom of <code>src/agent.ts</code>, the <span class="term" data-definition="The entry point is the file that runs first when you start a program. Here, 'npm start' runs src/agent.ts.">entry point</span>. Every run starts here.</p>
         <div class="translation-block animate-in">
           <div class="translation-code">
             <span class="translation-label">src/agent.ts</span>
@@ -151,7 +151,7 @@
                data-correct="b"
                data-explanation-right="Exactly. Without ANTHROPIC_API_KEY the program only runs the simulator lane and prints a tip. The fixture output is still correct and useful."
                data-explanation-wrong="Not quite. Look at the fork: the live lane only runs when the API key exists. Without it, you get fixture JSON plus a tip. Nothing is broken.">
-            <h3 class="quiz-question">A teammate runs <code>pnpm start</code> and sees only the Amsterdam JSON plus a "(Tip)" line. No Claude answer. What happened?</h3>
+            <h3 class="quiz-question">A teammate runs <code>npm start</code> and sees only the Amsterdam JSON plus a "(Tip)" line. No Claude answer. What happened?</h3>
             <div class="quiz-options">
               <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The weather tool crashed</span></button>
               <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>No API key is set, so only the simulator lane ran</span></button>

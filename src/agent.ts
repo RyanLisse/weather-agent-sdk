@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createSdkMcpServer, query } from '@anthropic-ai/claude-agent-sdk';
 import { clothingAdvice, decideWeather, type WeatherObservation } from './decide.ts';
+import { isMainModule } from './is-main.ts';
 import { fetchWeather, getWeatherTool } from './tools/get_weather.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -36,7 +37,7 @@ export function weatherMcpServer() {
 /** Live SDK path — requires ANTHROPIC_API_KEY (env only). */
 export async function runWeatherAgent(prompt: string) {
   if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('Set ANTHROPIC_API_KEY in the environment (see .env.example). No secrets in git.');
+    throw new Error('Set ANTHROPIC_API_KEY in the environment. No secrets in git.');
   }
   const server = weatherMcpServer();
   const instructions = loadInstructions();
@@ -55,8 +56,7 @@ export async function runWeatherAgent(prompt: string) {
   return messages;
 }
 
-const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
-if (isMain) {
+if (isMainModule(import.meta.url, process.argv[1])) {
   const city = process.argv[2] || 'Amsterdam';
   const date = process.argv[3] || '2026-09-21';
   const result = await fetchWeatherDecision({ city, date, useFixture: true });
