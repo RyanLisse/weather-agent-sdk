@@ -71,7 +71,7 @@
 
       <section class="screen animate-in">
         <h2 class="screen-heading">Tests: the smoke-alarm button</h2>
-        <p>You press the test button on a smoke alarm without setting the house on fire. <span class="term" data-definition="Unit tests are small automatic checks that run a piece of code with known inputs and compare the output to what you expect. Run them with 'pnpm test'.">Unit tests</span> do the same: known weather in, expected advice out, no API key, no network.</p>
+        <p>You press the test button on a smoke alarm without setting the house on fire. <span class="term" data-definition="Unit tests are small automatic checks that run a piece of code with known inputs and compare the output to what you expect. Run them with 'npm test'.">Unit tests</span> do the same: known weather in, expected advice out, no API key, no network.</p>
         <div class="translation-block animate-in">
           <div class="translation-code">
             <span class="translation-label">tests/weather-tool.test.ts</span>
@@ -136,7 +136,7 @@
                data-correct="c"
                data-explanation-right="Right. The quest is an instruction-only change. A new tool is exactly what the README says not to do, and the checker only looks at instructions.md."
                data-explanation-wrong="Not quite. The mini-quest is deliberately instruction-only. The fix belongs in instructions.md; adding code or tools misses the point of the exercise.">
-            <h3 class="quiz-question"><code>pnpm quest:clothing</code> prints "Mini-quest incomplete". Your AI offers to write a new <code>get_clothing</code> tool. What should you do instead?</h3>
+            <h3 class="quiz-question"><code>npm run quest:clothing</code> prints "Mini-quest incomplete". Your AI offers to write a new <code>get_clothing</code> tool. What should you do instead?</h3>
             <div class="quiz-options">
               <button class="quiz-option" data-value="a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Accept: more tools means better answers</span></button>
               <button class="quiz-option" data-value="b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Delete quest-clothing.ts so the error goes away</span></button>
